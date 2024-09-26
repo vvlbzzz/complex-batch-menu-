@@ -1,0 +1,245 @@
+@echo off
+title Complex Utility Menu
+setlocal enabledelayedexpansion
+
+:MainMenu
+cls
+echo ==============================
+echo        COMPLEX UTILITY
+echo ==============================
+echo [1] - Clear Drive (Format)
+echo [2] - Ping an IP Address
+echo [3] - Check Disk (chkdsk)
+echo [4] - Display Network Configuration (ipconfig)
+echo [5] - Create a New Directory
+echo [6] - Display Available Drives
+echo [7] - Delete Files by Extension
+echo [8] - View Local IP Address
+echo [9] - View Public IP Address
+echo [10] - Get Geo-location of Public IP
+echo [11] - Locate a Custom IP (Geo-location)
+echo [12] - Display ARP Table
+echo [13] - Traceroute to an IP/Host
+echo [14] - Flush DNS Cache
+echo [15] - Display Routing Table (route print)
+echo [16] - Start Remote Desktop (mstsc)
+echo [17] - Test Internet Speed (via PowerShell)
+echo [18] - Get MAC Address
+echo [19] - List Running Services
+echo [20] - Shutdown Computer
+echo [21] - Exit
+echo ==============================
+set /p choice="Select an option (1-21): "
+
+REM Menu options
+if "%choice%"=="1" goto :ClearDrive
+if "%choice%"=="2" goto :PingIP
+if "%choice%"=="3" goto :CheckDisk
+if "%choice%"=="4" goto :NetworkConfig
+if "%choice%"=="5" goto :CreateDirectory
+if "%choice%"=="6" goto :ShowDrives
+if "%choice%"=="7" goto :DeleteByExtension
+if "%choice%"=="8" goto :ViewLocalIP
+if "%choice%"=="9" goto :ViewPublicIP
+if "%choice%"=="10" goto :GeoLocation
+if "%choice%"=="11" goto :LocateCustomIP
+if "%choice%"=="12" goto :DisplayARP
+if "%choice%"=="13" goto :Traceroute
+if "%choice%"=="14" goto :FlushDNS
+if "%choice%"=="15" goto :RoutingTable
+if "%choice%"=="16" goto :RemoteDesktop
+if "%choice%"=="17" goto :TestSpeed
+if "%choice%"=="18" goto :GetMAC
+if "%choice%"=="19" goto :ListServices
+if "%choice%"=="20" goto :ShutdownComputer
+if "%choice%"=="21" goto :Exit
+echo Invalid option, please try again!
+pause
+goto :MainMenu
+
+:ClearDrive
+cls
+echo === CLEAR DRIVE ===
+echo WARNING: This will format the drive!
+set /p drive="Enter the drive letter (e.g., D): "
+echo Are you sure you want to format %drive%: ? (Y/N)
+set /p confirm=
+if /i "%confirm%"=="Y" (
+    echo Formatting %drive%...
+    format %drive%: /fs:NTFS /q
+) else (
+    echo Operation cancelled.
+)
+pause
+goto :MainMenu
+
+:PingIP
+cls
+echo === PING IP ===
+set /p ip="Enter the IP address to ping: "
+ping %ip%
+pause
+goto :MainMenu
+
+:CheckDisk
+cls
+echo === CHECK DISK ===
+set /p drive="Enter the drive letter to check (e.g., C): "
+chkdsk %drive%:
+pause
+goto :MainMenu
+
+:NetworkConfig
+cls
+echo === NETWORK CONFIGURATION ===
+ipconfig /all
+pause
+goto :MainMenu
+
+:CreateDirectory
+cls
+echo === CREATE DIRECTORY ===
+set /p path="Enter the directory path to create: "
+if exist "%path%" (
+    echo Directory already exists.
+) else (
+    mkdir "%path%"
+    echo Directory created: %path%
+)
+pause
+goto :MainMenu
+
+:ShowDrives
+cls
+echo === AVAILABLE DRIVES ===
+wmic logicaldisk get name
+pause
+goto :MainMenu
+
+:DeleteByExtension
+cls
+echo === DELETE FILES BY EXTENSION ===
+set /p ext="Enter the file extension to delete (e.g., .txt): "
+set /p path="Enter the directory path to delete from: "
+echo WARNING: This will delete all %ext% files in %path%
+set /p confirm="Are you sure? (Y/N): "
+if /i "%confirm%"=="Y" (
+    del "%path%\*%ext%" /s /q
+    echo All %ext% files in %path% deleted.
+) else (
+    echo Operation cancelled.
+)
+pause
+goto :MainMenu
+
+:ViewLocalIP
+cls
+echo === VIEW LOCAL IP ===
+echo Your local IP address is:
+for /f "tokens=2 delims=[]" %%a in ('ping %COMPUTERNAME% -4 -n 1 ^| findstr "["') do set IPAddress=%%a
+echo Local IP: %IPAddress%
+pause
+goto :MainMenu
+
+:ViewPublicIP
+cls
+echo === VIEW PUBLIC IP ===
+echo Retrieving your public IP address...
+powershell -Command "(Invoke-WebRequest -uri 'http://ipinfo.io/ip').Content"
+pause
+goto :MainMenu
+
+:GeoLocation
+cls
+echo === GEOLOCATION OF PUBLIC IP ===
+echo Retrieving Geo-location information...
+powershell -Command "(Invoke-WebRequest -uri 'http://ipinfo.io/json').Content"
+pause
+goto :MainMenu
+
+:LocateCustomIP
+cls
+echo === LOCATE CUSTOM IP ===
+set /p customip="Enter the IP address to locate: "
+echo Retrieving Geo-location for IP: %customip%...
+powershell -Command "(Invoke-WebRequest -uri 'http://ipinfo.io/%customip%/json').Content"
+pause
+goto :MainMenu
+
+:DisplayARP
+cls
+echo === DISPLAY ARP TABLE ===
+arp -a
+pause
+goto :MainMenu
+
+:Traceroute
+cls
+echo === TRACEROUTE ===
+set /p target="Enter the IP or Hostname to trace route: "
+tracert %target%
+pause
+goto :MainMenu
+
+:FlushDNS
+cls
+echo === FLUSH DNS CACHE ===
+ipconfig /flushdns
+echo DNS Cache has been flushed.
+pause
+goto :MainMenu
+
+:RoutingTable
+cls
+echo === DISPLAY ROUTING TABLE ===
+route print
+pause
+goto :MainMenu
+
+:RemoteDesktop
+cls
+echo === START REMOTE DESKTOP ===
+set /p remoteIP="Enter the IP address or Hostname for Remote Desktop: "
+mstsc /v:%remoteIP%
+pause
+goto :MainMenu
+
+:TestSpeed
+cls
+echo === TEST INTERNET SPEED ===
+echo Running speed test (download/upload)...
+powershell -Command "(Invoke-WebRequest -uri 'https://www.speedtest.net/api/js/speedtest?https=1').Content"
+pause
+goto :MainMenu
+
+:GetMAC
+cls
+echo === GET MAC ADDRESS ===
+getmac
+pause
+goto :MainMenu
+
+:ListServices
+cls
+echo === LIST RUNNING SERVICES ===
+net start
+pause
+goto :MainMenu
+
+:ShutdownComputer
+cls
+echo === SHUTDOWN COMPUTER ===
+echo WARNING: This will shutdown the computer.
+set /p confirm="Are you sure? (Y/N): "
+if /i "%confirm%"=="Y" (
+    shutdown /s /f /t 0
+) else (
+    echo Shutdown cancelled.
+)
+pause
+goto :MainMenu
+
+:Exit
+echo Exiting...
+pause
+exit
